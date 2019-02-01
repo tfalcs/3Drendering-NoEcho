@@ -1,26 +1,43 @@
+##Installing and loading required R packages
+install.packages("devtools")
+library(devtools)
+devtools::install_github("OHDSI/DatabaseConnector")
 library(DatabaseConnector)
 devtools::install_github("OHDSI/CohortMethod")
 library(CohortMethod)
 devtools::install_github("OHDSI/SqlRender")
 library(SqlRender)
 
-##Configuring the connection to the server
-dbms <- 'sql server' #sql server, postgres, etc
-server <- 'nypcdwdbtst1.sis.nyp.org'
-file <- 'C:/Users/tf2428/Documents/Network Studies/Spotnitz/ThreeDrenderingNoEcho.csv'
 
+##Configuring the connection to the server
+dbms <- 'sql dialect' #sql server, postgres, etc
+server <- 'server name' 
+user <- 'user'
+password <- 'password'
+
+
+##Setting up the directory
+folder <- 'C:/user/studyfolder' #specify a folder to store files and the output
+file <- c('ThreeDrenderingNoEcho_parameterized.sql') #the sql script that was downloaded from OHDSI github
+
+
+##Connecting to your database
 connectionDetails <- createConnectionDetails(dbms = dbms,
+                                             user = user,
+                                             password = password,
                                              server = server)
 
-cdmDatabaseSchema <- "ohdsi_cumc_pending.dbo"
-vocabularyDatabaseSchema <- 'ohdsi_cumc_pending.dbo'
-resultsDatabaseSchema <- "ohdsi_cumc_pending.results"
+
+##Fill in the names of your cdm and results schemas
+cdmDatabaseSchema <- "cdm_schema"
+vocabularyDatabaseSchema <- 'cdm_schema'
+resultsDatabaseSchema <- "results_schema"
 targetCohortTable <- "ThreeDrenderingNoEcho"
 targetCohortId <- "1"
 
 
-
-sql <- readSql("C:/Users/tf2428/Documents/Network Studies/Spotnitz/ThreeDrenderingNoEcho_parameterized.sql")
+##Using sqlRender for the sql script
+sql <- readSql(file)
 sql <- renderSql(sql, cdm_database_schema = cdmDatabaseSchema, vocabulary_database_schema = vocabularyDatabaseSchema,
                  target_database_schema = resultsDatabaseSchema, target_cohort_table = targetCohortTable, target_cohort_id = targetCohortId)$sql
 sql <- translateSql(sql, targetDialect = connectionDetails$dbms)$sql
@@ -38,5 +55,6 @@ sql <- translateSql(sql, targetDialect = connectionDetails$dbms)$sql
 output <- querySql(connection, sql)
 output <- data.frame(output)
 
+##Placing the year counts in the folder specified above
 write.csv(x = output, file = file)
 
