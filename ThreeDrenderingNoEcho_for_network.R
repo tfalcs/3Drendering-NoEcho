@@ -17,8 +17,9 @@ password <- 'password'
 
 
 ##Setting up the directory
-folder <- 'C:/user/studyfolder' #specify a folder to store files and the output
-file <- c('ThreeDrenderingNoEcho_parameterized.sql') #the sql script that was downloaded from OHDSI github
+folder <- "C:/user/studyfolder" #specify a folder to store files and the output
+sqlFile <- "ThreeDrenderingNoEcho_parameterized.sql" #the sql script that was downloaded from OHDSI github
+setwd(folder) 
 
 
 ##Connecting to your database
@@ -37,7 +38,7 @@ targetCohortId <- "1"
 
 
 ##Using sqlRender for the sql script
-sql <- readSql(file)
+sql <- readSql(sqlFile)
 sql <- renderSql(sql, cdm_database_schema = cdmDatabaseSchema, vocabulary_database_schema = vocabularyDatabaseSchema,
                  target_database_schema = resultsDatabaseSchema, target_cohort_table = targetCohortTable, target_cohort_id = targetCohortId)$sql
 sql <- translateSql(sql, targetDialect = connectionDetails$dbms)$sql
@@ -56,5 +57,5 @@ output <- querySql(connection, sql)
 output <- data.frame(output)
 
 ##Placing the year counts in the folder specified above
-write.csv(x = output, file = file)
+write.csv(x = output, file = "ThreeDrendering_NoEcho.csv")
 
